@@ -1,0 +1,7 @@
+.btn {
+  @apply flex justify-center items-center w-full h-10 my-4 rounded-md bg-primary hover:bg-primary-hover text-white;
+}
+
+.icon {
+  @apply ml-2;
+}

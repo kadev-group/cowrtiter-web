@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+    <style>
+        #textInput {
+            width: 500px; /* Adjust width as needed */
+            height: 500px; /* Adjust height as needed */
+        }
+        .cursor {
+            position: absolute;
+            background-color: red;
+            width: 2px;
+            height: 20px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <label for="usernameInput">Enter your username:</label>
+    <input type="text" id="usernameInput" placeholder="Your username">
+    <button id="connectButton">Connect</button>
+</div>
+<div id="messages"></div>
+<textarea id="textInput" placeholder="Type your message"></textarea>
+<button id="sendButton">Send</button>
+<div id="cursorIndicator" class="cursor"></div>
+
+<script>
+    let username = '';
+    const textInput = document.getElementById('textInput');
+    const usernameInput = document.getElementById('usernameInput');
+    const connectButton = document.getElementById('connectButton');
+    const cursorIndicator = document.getElementById('cursorIndicator');
+
+    function setInitialTextFromAPI() {
+        // Make a GET request to your API
+        fetch('http://localhost:4000/v1/workspace/4')
+            .then(response => response.text())
+            .then(data => {
+                const jsonData = JSON.parse(data)
+                if (jsonData.body !== undefined) {
+                    textInput.value = jsonData.body;
+                }
+            })
+            .catch(error => console.error('Error fetching initial text:', error));
+    }
+
+    connectButton.addEventListener('click', function() {
+        username = usernameInput.value;
+        let socket = new WebSocket('ws://localhost:4000/v1/ws/pool/' + username + '/4');
+
+        socket.onmessage = function(event) {
+            console.log(event.data);
+            const data = JSON.parse(event.data);
+            if (data.error_message !== "" && data.error_message !== undefined) {
+                alert(data.error_message)
+                return
+            }
+
+            textInput.value = data.body;
+        };
+
+        textInput.addEventListener('input', function() {
+            const body = textInput.value;
+
+            const messageObj = {
+                user_id: username,
+                board_id: 1,
+                body: body,
+            };
+            socket.send(JSON.stringify(messageObj));
+        });
+
+        socket.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+    });
+
+    // Call the function to set initial text from API when the page loads
+    window.addEventListener('load', setInitialTextFromAPI);
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Google Auth Example</title>
+    <meta http-equiv="Content-Security-Policy" content="base-uri 'self' https://accounts.google.com/">
+</head>
+<body>
+<button id="loginButton">Login with Google</button>
+
+<script>
+    document
+        .getElementById("loginButton")
+        .addEventListener("click", async function () {
+            const state = generateUUID();
+            localStorage.setItem("state", state);
+
+            // Redirect the user to the Google OAuth URL
+            window.location.href = `http://localhost:8080/auth/google/${state}/redirect`;
+        });
+
+    function generateUUID() {
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+            /[xy]/g,
+            function (c) {
+                const r = (Math.random() * 16) | 0;
+                const v = c === "x" ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+            }
+        );
+    }
+</script>
+</body>
+</html>

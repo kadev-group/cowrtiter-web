@@ -1,0 +1,15 @@
+.content {
+  @apply container w-full h-screen mx-auto max-w-md;
+}
+
+.settings {
+  @apply flex items-center px-5 h-14 border-b mb-5 border-gray-300 bg-white;
+}
+
+.text {
+  @apply text-base leading-7 text-gray-600 mx-4
+}
+
+.title {
+  @apply font-semibold text-xl;
+}

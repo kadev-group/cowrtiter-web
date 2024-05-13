@@ -1,0 +1,99 @@
+version: 2.1
+
+jobs:
+  install-deps:
+    docker:
+      - image: cimg/node:18.13.0
+    working_directory: ~/project
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - node_deps-{{ checksum "yarn.lock" }}
+      - run: 
+          command: yarn install
+      - save_cache:
+          key: node_deps-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/project/node_modules
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+  deploy-feature-branch:
+    docker:
+      - image: cimg/node:18.13.0
+    working_directory: ~/project
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: yarn build
+
+  deploy-dev:
+    docker:
+      - image: cimg/node:18.13.0
+
+    working_directory: ~/project
+  
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: cp .env.development .env
+
+      - run: yarn build
+
+      - run: sudo apt update
+      - run: sudo apt install rsync sshpass -y
+
+      - run: mkdir ~/.ssh && ssh-keyscan b2b.ak-cent.biz >> ~/.ssh/known_hosts
+      
+      - run: sshpass -e rsync -azuP --delete-before . ubuntu@b2b.ak-cent.biz:~/dev/frontend/portal-web
+      - run: sshpass -e ssh ubuntu@b2b.ak-cent.biz /usr/bin/pm2 restart frontend
+
+  deploy-prod:
+    docker:
+      - image: cimg/node:18.13.0
+
+    working_directory: ~/project
+  
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run: cp .env.production .env
+
+      - run: yarn build
+
+      - run: sudo apt update
+      - run: sudo apt install rsync sshpass -y
+
+      - run: mkdir ~/.ssh && ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+      
+      - run: sshpass -e rsync -azuP --delete-before . $SSH_USER@$SSH_HOST:~/dev/frontend/portal-web
+      - run: sshpass -e ssh $SSH_USER@$SSH_HOST /usr/bin/pm2 restart next
+
+workflows:
+  build-and-sync:
+    jobs:
+      - install-deps
+      - deploy-feature-branch:
+          filters:
+            branches:
+              ignore:
+                - main
+                - dev
+          requires:
+            - install-deps
+      - deploy-dev:
+          filters:
+            branches:
+              only:
+                - dev
+          requires:
+            - install-deps
+      - deploy-prod:
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - install-deps

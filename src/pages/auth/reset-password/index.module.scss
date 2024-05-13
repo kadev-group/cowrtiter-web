@@ -1,0 +1,11 @@
+.content {
+  @apply container w-full h-screen mx-auto max-w-md;
+}
+
+.inner {
+  @apply h-full flex flex-col justify-center px-4 py-4 sm:px-12 sm:py-16;
+}
+
+.title {
+  @apply font-semibold text-xl;
+}

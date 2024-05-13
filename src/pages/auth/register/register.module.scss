@@ -1,0 +1,19 @@
+.content {
+  @apply container w-full h-full mx-auto max-w-xl;
+}
+
+.inner {
+  @apply h-full flex flex-col justify-center px-4 py-4 sm:px-12 sm:py-16;
+}
+
+.title {
+  @apply font-semibold text-base sm:text-xl;
+}
+
+.row {
+  @apply flex flex-col justify-between;
+}
+
+.col {
+  @apply grid lg:grid-cols-1 lg:gap-0;
+}

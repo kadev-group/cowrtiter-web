@@ -1,0 +1,7 @@
+.content {
+  @apply flex flex-col w-[440px] justify-center pl-12 pt-16 pb-16 pr-12;
+}
+
+.title {
+  @apply font-semibold text-xl;
+}
